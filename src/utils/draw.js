@@ -1,13 +1,13 @@
-import { ctx } from "./canvas.js";
+import { ctx } from "../utils/canvas";
 
 const squareSize = 30;
 
-function drawSquare(ctx, x, y, color) {
+function drawSquare(x, y, color) {
   ctx.fillStyle = color;
   ctx.fillRect(x, y, squareSize, squareSize);
 }
 
-function drawTriangle(ctx, x, y, color) {
+function drawTriangle(x, y, color) {
   ctx.fillStyle = color;
   ctx.beginPath();
   ctx.moveTo(x, y);
@@ -17,7 +17,7 @@ function drawTriangle(ctx, x, y, color) {
   ctx.fill();
 }
 
-function drawCross(ctx, x, y, color) {
+function drawCross(x, y, color) {
   ctx.strokeStyle = color;
   ctx.lineWidth = 3;
   ctx.beginPath();
@@ -28,7 +28,7 @@ function drawCross(ctx, x, y, color) {
   ctx.stroke();
 }
 
-function drawCircle(ctx, x, y, color) {
+function drawCircle(x, y, color) {
   ctx.fillStyle = color;
   ctx.beginPath();
   let radius = 15;

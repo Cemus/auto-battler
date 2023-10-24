@@ -3,15 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="style.css" />
-    <script type="module" src="index.js" defer></script>
-    <script type="module" src="./entities/enemies.js" defer></script>
-    <script type="module" src="./utils/draw.js" defer></script>
-    <script type="module" src="./utils/canvas.js" defer></script>
-    <script type="module" src="./entities/player.js" defer></script>
-    <script type="module" src="./utils/conditionParser.js" defer></script>
     <title>Auto Battler</title>
-  </head>
+  <script defer src="bundle.js"></script></head>
   <body>
     <div class="container">
       <canvas id="gameCanvas" width="800" height="600"></canvas>
@@ -23,13 +16,13 @@
             <option value="enemy">Enemy</option>
           </select>
 
-          <label for="condition0">Has</label>
+          <label for="condition0">has</label>
           <select name="gambits" id="condition0">
             <option value="HP > 50%">HP > 50%</option>
             <option value="HP = 100%">HP = 100%</option>
           </select>
 
-          <label for="action0">So you</label>
+          <label for="action0">he</label>
           <select name="gambits" id="action0">
             <option value="attack">Attack</option>
             <option value="defend">Defend</option>
@@ -44,18 +37,28 @@
         </div>
 
         <div class="gambit">
-          <label for="condition1">If</label>
+          <label for="subject1">If</label>
+          <select name="gambits" id="subject1">
+            <option value="player">Player</option>
+            <option value="enemy">Enemy</option>
+          </select>
+          <label for="condition1">has</label>
           <select name="gambits" id="condition1">
             <option value="HP > 50%">HP > 50%</option>
             <option value="HP = 100%">HP = 100%</option>
           </select>
 
-          <label for="action1">So</label>
+          <label for="action1">he</label>
           <select name="gambits" id="action1">
-            <option value="">Choose a value</option>
             <option value="attack">Attack</option>
             <option value="defend">Defend</option>
             <option value="heal">Heal</option>
+          </select>
+
+          <label for="target1">this target</label>
+          <select name="gambits" id="target1">
+            <option value="player">Player</option>
+            <option value="enemy">Enemy</option>
           </select>
         </div>
         </div>
