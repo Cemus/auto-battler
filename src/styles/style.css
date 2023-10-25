@@ -20,7 +20,7 @@ body {
   margin: 1rem;
   padding: 1rem;
 }
-canvas {
+.game-canvas {
   align-self: center;
   background-color: rgb(255, 255, 255);
 }

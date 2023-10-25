@@ -4,109 +4,99 @@ import {
   drawCircle,
   drawTriangle,
   drawCross,
-  squareSize,
 } from "../utils/draw.js";
 
 //Variables
 let target = null;
+let coolDown = 100;
 
 class Enemy {
-  constructor(name, job, positionX, positionY, coolDown) {
+  constructor(name, job, gridX, gridY, stats, hasAttacked) {
     this.name = name;
     this.job = job;
-    this.positionX = positionX;
-    this.positionY = positionY;
-    this.coolDown = coolDown;
+    this.gridX = gridX;
+    this.gridY = gridY;
+    this.stats = stats;
+    this.hasAttacked = hasAttacked;
   }
   sprite() {
+    const cellSize = 64;
+    const cellSpacing = 1;
+    const x = this.gridX * (cellSize + cellSpacing) + cellSize / 2;
+    const y = this.gridY * (cellSize + cellSpacing) + cellSize / 2;
     switch (this.job) {
       case "warrior":
-        drawTriangle(this.positionX, this.positionY, "red");
+        drawTriangle(x, y, "red");
         break;
       case "mage":
-        drawCircle(this.positionX, this.positionY, "red");
+        drawCircle(x, y, "red");
         break;
       case "archer":
-        drawCross(this.positionX, this.positionY, "red");
+        drawCross(x, y, "red");
         break;
       default:
-        drawSquare(this.positionX, this.positionY, "red");
+        drawSquare(x, y, "red");
         break;
     }
   }
 }
 
 //States
-const STATE_FIND_ENEMY = "FIND";
-const STATE_FOLLOW_ENEMY = "FOLLOW";
-const STATE_ATTACK_ENEMY = "ATTACK";
-const STATE_ENGAGE_ENEMY = "ENGAGE";
-let currentState = STATE_FIND_ENEMY;
+const STATE_FIND = "FIND";
+const STATE_IDLE = "IDLE";
+const STATE_ATTACK = "ATTACK";
+const STATE_ENGAGE = "ENGAGE";
+let currentState = STATE_IDLE;
 
-function updateEnemyBehavior(self, playersList, allies) {
+function updateEnemyBehavior(self, playersList, allies, nextPlayer) {
   ai.correctPosition(self);
-  self.sprite();
-  if (self.coolDown > 0) {
-    self.coolDown--;
+  if (coolDown > 0) {
+    coolDown -= self.stats.spd;
   }
-  console.log(currentState);
+  let all = [...playersList, ...allies];
+  console.log(self, currentState);
   switch (currentState) {
-    case STATE_FIND_ENEMY:
+    case STATE_IDLE:
+      if (self.hasAttacked === false) {
+        currentState = STATE_ENGAGE;
+      } else {
+        nextPlayer();
+      }
+      break;
+    case STATE_FIND:
       const playerTargetted = ai.findTarget(self, playersList);
       if (playerTargetted) {
         target = playerTargetted;
-        currentState = STATE_FOLLOW_ENEMY;
+        currentState = STATE_IDLE;
       } else {
-        currentState = STATE_FIND_ENEMY;
+        currentState = STATE_FIND;
       }
       break;
-    case STATE_FOLLOW_ENEMY:
+    case STATE_ENGAGE:
       if (target) {
         if (!ai.canAttack(self)) {
-          if (
-            Math.abs(target.positionX - self.positionX) >= 50 ||
-            Math.abs(target.positionY - self.positionY) >= 50
-          ) {
-            const allyWhichIsTooClose = ai.isTooCloseFromAlly(self, allies);
-            console.log(allyWhichIsTooClose);
-            if (allyWhichIsTooClose !== null) {
-              console.log("too close");
-              ai.moveAwayFromAlly(self, allyWhichIsTooClose);
-            } else {
-              ai.followEnemy(self, target);
-            }
+          if (!ai.isNextToEnemy(self, target)) {
+            ai.followEnemy(self, target, all);
+          } else {
+            currentState = STATE_ATTACK;
           }
         }
-        if (ai.canAttack(self)) {
-          currentState = STATE_ENGAGE_ENEMY;
-        }
       } else {
-        currentState = STATE_FIND_ENEMY;
+        currentState = STATE_FIND;
       }
       break;
-    case STATE_ENGAGE_ENEMY:
-      if (!ai.isNextToEnemy(self, target)) {
-        const allyWhichIsTooClose = ai.isTooCloseFromAlly(self, allies);
-        console.log(allyWhichIsTooClose);
-        if (allyWhichIsTooClose !== null) {
-          console.log("too close");
-          ai.moveAwayFromAlly(self, allyWhichIsTooClose);
-        } else {
-          ai.followEnemy(self, target);
-        }
+    case STATE_ATTACK:
+      if (ai.canAttack(coolDown)) {
+        ai.Attack(self, target, all);
+        coolDown = 100;
+        currentState = STATE_IDLE;
       } else {
-        currentState = STATE_ATTACK_ENEMY;
-      }
-      break;
-    case STATE_ATTACK_ENEMY:
-      if (ai.canAttack(self)) {
-        ai.Attack(self, target);
-        self.coolDown = 100;
-      } else {
-        currentState = STATE_FOLLOW_ENEMY;
+        currentState = STATE_IDLE;
       }
       break;
   }
+
+  self.sprite();
 }
 
 export { Enemy, updateEnemyBehavior };

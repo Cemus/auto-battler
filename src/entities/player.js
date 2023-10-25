@@ -11,26 +11,30 @@ import { actionParser } from "../utils/actions.js";
 import { canvas } from "../utils/canvas.js";
 
 class Player {
-  constructor(name, job, positionX, positionY, coolDown) {
+  constructor(name, job, gridX, gridY, coolDown) {
     this.name = name;
     this.job = job;
-    this.positionX = positionX;
-    this.positionY = positionY;
+    this.gridX = gridX;
+    this.gridY = gridY;
     this.coolDown = coolDown;
   }
   sprite() {
+    const cellSize = 64;
+    const cellSpacing = 1;
+    const x = this.gridX * (cellSize + cellSpacing) + cellSize / 2;
+    const y = this.gridY * (cellSize + cellSpacing) + cellSize / 2;
     switch (this.job) {
       case "warrior":
-        drawTriangle(this.positionX, this.positionY, "blue");
+        drawTriangle(x, y, "blue");
         break;
       case "mage":
-        drawCircle(this.positionX, this.positionY, "blue");
+        drawCircle(x, y, "blue");
         break;
       case "archer":
-        drawCross(this.positionX, this.positionY, "blue");
+        drawCross(x, y, "blue");
         break;
       default:
-        drawSquare(this.positionX, this.positionY, "blue");
+        drawSquare(x, y, "blue");
         break;
     }
   }

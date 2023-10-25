@@ -1,93 +1,179 @@
-import { canvas } from "./canvas";
-import { squareSize } from "./draw";
+import { canvas, gridSize } from "./canvas";
 
 export const correctPosition = (self) => {
-  if (self.positionX <= 0 || self.positionY <= 0) {
-    self.positionX += 1;
-    self.positionY += 1;
+  if (self.gridX < 0) {
+    self.gridX += 1;
   }
-  if (self.positionX > canvas.width || self.positionY > canvas.height) {
-    self.positionX -= 1;
-    self.positionY -= 1;
+  if (self.gridY < 0) {
+    self.gridY += 1;
+  }
+  if (self.gridX > canvas.width) {
+    self.gridX -= 1;
+  }
+  if (self.gridY > canvas.height) {
+    self.gridY -= 1;
   }
 };
 
-export const isTooCloseFromAlly = (self, allies) => {
-  const safeDistance = 30;
+const isSpaceFree = (whichPosition, self, all) => {
+  let placeIsFree = true;
+  switch (whichPosition) {
+    case "xPlus":
+      all.forEach((instance) => {
+        if (
+          instance.gridX === self.gridX + 1 &&
+          instance.gridY === self.gridY
+        ) {
+          placeIsFree = false;
+        }
+      });
+      if (self.gridX + 1 > gridSize / Math.sqrt(gridSize) - 1) {
+        placeIsFree = false;
+      }
+      break;
+    case "xMinus":
+      all.forEach((instance) => {
+        if (
+          instance.gridX === self.gridX - 1 &&
+          instance.gridY === self.gridY
+        ) {
+          placeIsFree = false;
+        }
+      });
+      if (self.gridX - 1 < 0) {
+        placeIsFree = false;
+      }
+      break;
 
-  for (const ally of allies) {
-    if (ally !== self) {
-      const deltaX = self.positionX - ally.positionX;
-      const deltaY = self.positionY - ally.positionY;
-      const distance = Math.floor(Math.sqrt(deltaX * deltaX + deltaY * deltaY));
-      console.log(distance);
-      if (distance < safeDistance) {
-        console.log(ally);
-        return ally;
+    case "yPlus":
+      all.forEach((instance) => {
+        if (
+          instance.gridX === self.gridX &&
+          instance.gridY === self.gridY + 1
+        ) {
+          placeIsFree = false;
+        }
+      });
+      if (self.gridY + 1 > gridSize / Math.sqrt(gridSize) - 1) {
+        placeIsFree = false;
+      }
+      break;
+
+    case "yMinus":
+      all.forEach((instance) => {
+        if (
+          instance.gridX === self.gridX &&
+          instance.gridY === self.gridY - 1
+        ) {
+          placeIsFree = false;
+        }
+      });
+      if (self.gridY - 1 < 0) {
+        placeIsFree = false;
+      }
+      break;
+  }
+
+  return placeIsFree;
+};
+
+export const followEnemy = (self, target, all) => {
+  const tx = target.gridX;
+  const ty = target.gridY;
+  const sx = self.gridX;
+  const sy = self.gridY;
+  const diffX = Math.abs(tx - sx);
+  const diffY = Math.abs(ty - sy);
+
+  let moved = false;
+
+  if (diffX >= diffY) {
+    if (sx < tx) {
+      if (isSpaceFree("xPlus", self, all)) {
+        self.gridX = sx + 1;
+        moved = true;
+      }
+    } else {
+      if (isSpaceFree("xMinus", self, all)) {
+        self.gridX = sx - 1;
+        moved = true;
+      }
+    }
+  } else {
+    if (sy < ty) {
+      if (isSpaceFree("yPlus", self, all)) {
+        self.gridY = sy + 1;
+        moved = true;
+      }
+    } else {
+      if (isSpaceFree("yMinus", self, all)) {
+        self.gridY = sy - 1;
+        moved = true;
       }
     }
   }
 
-  return null;
+  if (!moved) {
+    let randomDirection = getRandomDirection();
+    while (!isSpaceFree(randomDirection, self, all)) {
+      randomDirection = getRandomDirection();
+    }
+
+    self.gridX +=
+      randomDirection === "xPlus" ? 1 : randomDirection === "xMinus" ? -1 : 0;
+    self.gridY +=
+      randomDirection === "yPlus" ? 1 : randomDirection === "yMinus" ? -1 : 0;
+  }
 };
 
-export const moveAwayFromAlly = (self, ally) => {
-  console.log("movingaway");
-  const safeDistance = 30;
+const getRandomDirection = () => {
+  const directions = ["xPlus", "xMinus", "yPlus", "yMinus"];
+  const randomIndex = Math.floor(Math.random() * directions.length);
+  return directions[randomIndex];
+};
 
-  const deltaX = self.positionX - ally.positionX;
-  const deltaY = self.positionY - ally.positionY;
-  const distance = Math.floor(Math.sqrt(deltaX * deltaX + deltaY * deltaY));
-  console.log(distance);
-  console.log(deltaX + " x");
-  console.log(deltaY + " y");
-  if (distance < safeDistance) {
-    if (distance < safeDistance) {
-      if (deltaX <= 0) {
-        console.log(deltaX + " deltaX");
-        self.positionX -= 1;
-      } else {
-        self.positionX += 1;
+export const Attack = (self, target, all) => {
+  let targetPushed = false;
+  if (!self.hasAttacked) {
+    if (self.gridX === target.gridX && self.gridY < target.gridY) {
+      if (isSpaceFree("yPlus", target, all)) {
+        target.gridY += 1;
+        targetPushed = true;
       }
-      if (deltaY <= 0) {
-        console.log(deltaY + " deltaY");
-        self.positionY -= 1;
-      } else {
-        self.positionY += 1;
+    } else if (self.gridX === target.gridX && self.gridY > target.gridY) {
+      if (isSpaceFree("yMinus", target, all)) {
+        target.gridY -= 1;
+        targetPushed = true;
+      }
+    } else if (self.gridY === target.gridY && self.gridX < target.gridX) {
+      if (isSpaceFree("xPlus", target, all)) {
+        target.gridX += 1;
+        targetPushed = true;
+      }
+    } else if (self.gridY === target.gridY && self.gridX > target.gridX) {
+      if (isSpaceFree("yMinus", target, all)) {
+        target.gridX -= 1;
+        targetPushed = true;
       }
     }
+    if (!targetPushed) {
+      const directions = ["xPlus", "xMinus", "yPlus", "yMinus"];
+      for (let i = 0; i < directions.length; i++) {
+        if (isSpaceFree(directions[i], target, all)) {
+          target.gridX +=
+            directions[i] === "xPlus" ? 1 : directions[i] === "xMinus" ? -1 : 0;
+          target.gridY +=
+            directions[i] === "yPlus" ? 1 : directions[i] === "yMinus" ? -1 : 0;
+          break;
+        }
+      }
+    }
+    self.hasAttacked = true;
   }
 };
 
-export const Attack = (self, target) => {
-  if (target.positionX <= self.positionX) {
-    target.positionX -= 10;
-  } else {
-    target.positionX += 10;
-  }
-
-  if (target.positionY <= self.positionY) {
-    target.positionY -= 10;
-  } else {
-    target.positionY += 10;
-  }
-};
-
-export const canAttack = (self) => {
-  return self.coolDown <= 0;
-};
-
-export const followEnemy = (self, target) => {
-  if (target.positionX + 10 < self.positionX) {
-    self.positionX -= 1;
-  } else {
-    self.positionX += 1;
-  }
-  if (target.positionY + 10 < self.positionY) {
-    self.positionY -= 1;
-  } else {
-    self.positionY += 1;
-  }
+export const canAttack = (coolDown) => {
+  return coolDown <= 0;
 };
 
 export const findTarget = (self, opponentList) => {
@@ -95,7 +181,7 @@ export const findTarget = (self, opponentList) => {
   opponentList.forEach((player) => {
     if (
       closestTarget === null ||
-      closestTarget.positionX < Math.abs(player.positionX - self.positionX)
+      closestTarget.gridX < Math.abs(player.gridX - self.gridX)
     ) {
       closestTarget = player;
     }
@@ -104,20 +190,14 @@ export const findTarget = (self, opponentList) => {
 };
 
 export const isNextToEnemy = (self, target) => {
-  if (
-    target.positionX < self.positionX + squareSize &&
-    target.positionX + squareSize > self.positionX &&
-    target.positionY < self.positionY + squareSize &&
-    target.positionY + squareSize > self.positionY
-  ) {
-    return true;
-  }
+  const diffX = Math.abs(target.gridX - self.gridX);
+  const diffY = Math.abs(target.gridY - self.gridY);
+  const isTrue = (diffX === 1 && diffY === 0) || (diffX === 0 && diffY === 1);
+  return (diffX === 1 && diffY === 0) || (diffX === 0 && diffY === 1);
 };
 
 export default {
   correctPosition,
-  isTooCloseFromAlly,
-  moveAwayFromAlly,
   Attack,
   canAttack,
   followEnemy,
