@@ -15,6 +15,120 @@ export const correctPosition = (self) => {
   }
 };
 
+class Node {
+  constructor(gridX, gridY) {
+    this.gridX = gridX;
+    this.gridY = gridY;
+    this.g_cost = 0;
+    this.h_cost = 0;
+    this.f_cost = 0;
+    this.parent = null;
+  }
+}
+
+function getNeighbors(node) {
+  const neighbors = [];
+  const potentialNeighbors = [
+    { gridX: node.gridX + 1, gridY: node.gridY },
+    { gridX: node.gridX - 1, gridY: node.gridY },
+    { gridX: node.gridX, gridY: node.gridY + 1 },
+    { gridX: node.gridX, gridY: node.gridY - 1 },
+  ];
+
+  potentialNeighbors.forEach((neighbor) => {
+    const newNeighbor = new Node(neighbor.gridX, neighbor.gridY);
+    neighbors.push(newNeighbor);
+  });
+  console.log(neighbors);
+  return neighbors;
+}
+
+function heuristic(node, goal) {
+  const dX = Math.abs(node.gridX - goal.gridX);
+  const dY = Math.abs(node.gridY - goal.gridY);
+  return dX + dY;
+}
+
+function reconstructPath(node) {
+  const path = [node];
+  while (node.parent !== null) {
+    node = node.parent;
+    path.push(node);
+  }
+  console.log(path.sort((a, b) => a - b));
+  return path.sort((a, b) => a - b);
+}
+
+export function aStar(self, target, all) {
+  let selfNode = new Node(self.gridX, self.gridY);
+  let targetNode = new Node(target.gridX, target.gridY);
+  const start = selfNode;
+  const goal = targetNode;
+  const openList = [start];
+  const closedList = [];
+  let count = 0;
+
+  while (openList.length > 0 && count < 1000) {
+    count++;
+    let current = openList[0];
+    console.log("CURRENT NODE ASSOCIE ", current);
+    for (let i = 0; i < openList.length; i++) {
+      if (
+        openList[i].f_cost < current.f_cost ||
+        (openList[i].f_cost === current.f_cost &&
+          openList[i].h_cost < current.h_cost)
+      ) {
+        current = openList[i];
+      }
+    }
+
+    openList.splice(openList.indexOf(current), 1);
+    closedList.push(current);
+
+    if (current.gridX === goal.gridX && current.gridY === goal.gridY) {
+      console.log("GOAL ATTEINT");
+      return reconstructPath(current);
+    }
+
+    const neighbors = getNeighbors(current);
+
+    for (let i = 0; i < neighbors.length; i++) {
+      const neighbor = neighbors[i];
+      if (isGridSpaceFree(neighbor, all) && !closedList.includes(neighbor)) {
+        const tentative_g_cost = current.g_cost + 1;
+
+        if (
+          !openList.includes(neighbor) ||
+          tentative_g_cost < neighbor.g_cost
+        ) {
+          neighbor.parent = current;
+          neighbor.g_cost = tentative_g_cost;
+          neighbor.h_cost = heuristic(neighbor, goal);
+          neighbor.f_cost = neighbor.g_cost + neighbor.h_cost;
+
+          if (!openList.includes(neighbor)) {
+            openList.push(neighbor);
+          }
+        }
+      } else {
+        closedList.push(neighbor);
+      }
+    }
+  }
+  console.log("pas de chemin");
+  return [];
+}
+
+const isGridSpaceFree = (self, all) => {
+  let placeIsFree = true;
+  all.forEach((instance) => {
+    if (instance.gridX === self.gridX && instance.gridY === self.gridY) {
+      placeIsFree = false;
+    }
+  });
+  return placeIsFree;
+};
+
 const isSpaceFree = (whichPosition, self, all) => {
   let placeIsFree = true;
   switch (whichPosition) {
@@ -203,4 +317,5 @@ export default {
   followEnemy,
   findTarget,
   isNextToEnemy,
+  aStar,
 };

@@ -11,12 +11,13 @@ let target = null;
 let coolDown = 100;
 
 class Enemy {
-  constructor(name, job, gridX, gridY, stats, hasAttacked) {
+  constructor(name, job, gridX, gridY, stats, hasMoved, hasAttacked) {
     this.name = name;
     this.job = job;
     this.gridX = gridX;
     this.gridY = gridY;
     this.stats = stats;
+    this.hasMoved = hasMoved;
     this.hasAttacked = hasAttacked;
   }
   sprite() {
@@ -54,7 +55,7 @@ function updateEnemyBehavior(self, playersList, allies, nextPlayer) {
     coolDown -= self.stats.spd;
   }
   let all = [...playersList, ...allies];
-  console.log(self, currentState);
+  /*   console.log(self, currentState); */
   switch (currentState) {
     case STATE_IDLE:
       if (self.hasAttacked === false) {
@@ -76,7 +77,10 @@ function updateEnemyBehavior(self, playersList, allies, nextPlayer) {
       if (target) {
         if (!ai.canAttack(self)) {
           if (!ai.isNextToEnemy(self, target)) {
-            ai.followEnemy(self, target, all);
+            if (self.hasMoved === false) {
+              self.hasMoved = true;
+              ai.aStar(self, target, all);
+            }
           } else {
             currentState = STATE_ATTACK;
           }

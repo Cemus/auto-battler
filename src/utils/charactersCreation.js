@@ -27,8 +27,24 @@ let enemyChar1 = new Enemy(
   enemiesStats,
   false
 );
-let enemyChar2 = new Enemy("Méchant mage", "mage", 3, 5, enemiesStats, false);
-let enemyChar3 = new Enemy("Méchant mage", "mage", 4, 5, enemiesStats2, false);
+let enemyChar2 = new Enemy(
+  "Méchant mage",
+  "mage",
+  3,
+  5,
+  enemiesStats,
+  false,
+  false
+);
+let enemyChar3 = new Enemy(
+  "Méchant mage",
+  "mage",
+  4,
+  5,
+  enemiesStats2,
+  false,
+  false
+);
 
 playersList.push(playerChar1);
 enemiesList.push(enemyChar1, enemyChar3);

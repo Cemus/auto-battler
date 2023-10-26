@@ -27,7 +27,7 @@ function gameLoop() {
         enemy.sprite();
       }
     });
-    console.log(currentPlayer);
+    /*     console.log(currentPlayer); */
     updateEnemyBehavior(currentPlayer, playersList, enemiesList, nextPlayer);
   } else {
     currentPlayerIndex = 0;
