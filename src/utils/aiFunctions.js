@@ -26,8 +26,13 @@ class Node {
   }
 }
 
-function getNeighbors(node) {
+function getNeighbors(node, target, all) {
   const neighbors = [];
+  const allButtarget = all.filter((instance) => {
+    return !(
+      instance.gridX === target.gridX && instance.gridY === target.gridY
+    );
+  });
   const potentialNeighbors = [
     { gridX: node.gridX + 1, gridY: node.gridY },
     { gridX: node.gridX - 1, gridY: node.gridY },
@@ -37,13 +42,20 @@ function getNeighbors(node) {
 
   potentialNeighbors.forEach((neighbor) => {
     const newNeighbor = new Node(neighbor.gridX, neighbor.gridY);
-    neighbors.push(newNeighbor);
+    if (
+      isGridSpaceFree(newNeighbor, allButtarget) &&
+      newNeighbor.gridX >= 0 &&
+      newNeighbor.gridY >= 0 &&
+      newNeighbor.gridX <= Math.sqrt(gridSize) - 1 &&
+      newNeighbor.gridY <= Math.sqrt(gridSize) - 1
+    ) {
+      neighbors.push(newNeighbor);
+    }
   });
-  console.log(neighbors);
   return neighbors;
 }
 
-function heuristic(node, goal) {
+function getHeuristicCost(node, goal) {
   const dX = Math.abs(node.gridX - goal.gridX);
   const dY = Math.abs(node.gridY - goal.gridY);
   return dX + dY;
@@ -55,8 +67,19 @@ function reconstructPath(node) {
     node = node.parent;
     path.push(node);
   }
-  console.log(path.sort((a, b) => a - b));
+  const result = path.reverse();
+  result.pop();
   return path.sort((a, b) => a - b);
+}
+
+function verifyNode(list, node) {
+  let result = false;
+  list.forEach((element) => {
+    if (element.gridX === node.gridX && element.gridY === node.gridY) {
+      result = true;
+    }
+  });
+  return result;
 }
 
 export function aStar(self, target, all) {
@@ -66,12 +89,9 @@ export function aStar(self, target, all) {
   const goal = targetNode;
   const openList = [start];
   const closedList = [];
-  let count = 0;
 
-  while (openList.length > 0 && count < 1000) {
-    count++;
+  while (openList.length > 0) {
     let current = openList[0];
-    console.log("CURRENT NODE ASSOCIE ", current);
     for (let i = 0; i < openList.length; i++) {
       if (
         openList[i].f_cost < current.f_cost ||
@@ -81,41 +101,33 @@ export function aStar(self, target, all) {
         current = openList[i];
       }
     }
-
     openList.splice(openList.indexOf(current), 1);
     closedList.push(current);
-
     if (current.gridX === goal.gridX && current.gridY === goal.gridY) {
-      console.log("GOAL ATTEINT");
       return reconstructPath(current);
     }
 
-    const neighbors = getNeighbors(current);
-
+    const neighbors = getNeighbors(current, target, all);
     for (let i = 0; i < neighbors.length; i++) {
       const neighbor = neighbors[i];
-      if (isGridSpaceFree(neighbor, all) && !closedList.includes(neighbor)) {
+      if (!verifyNode(closedList, neighbor)) {
         const tentative_g_cost = current.g_cost + 1;
-
         if (
-          !openList.includes(neighbor) ||
+          !verifyNode(openList, neighbor) ||
           tentative_g_cost < neighbor.g_cost
         ) {
           neighbor.parent = current;
           neighbor.g_cost = tentative_g_cost;
-          neighbor.h_cost = heuristic(neighbor, goal);
+          neighbor.h_cost = getHeuristicCost(neighbor, goal);
           neighbor.f_cost = neighbor.g_cost + neighbor.h_cost;
 
-          if (!openList.includes(neighbor)) {
+          if (!verifyNode(openList, neighbor)) {
             openList.push(neighbor);
           }
         }
-      } else {
-        closedList.push(neighbor);
       }
     }
   }
-  console.log("pas de chemin");
   return [];
 }
 
@@ -189,6 +201,19 @@ const isSpaceFree = (whichPosition, self, all) => {
   }
 
   return placeIsFree;
+};
+
+export const move = (self, path) => {
+  for (let i = 0; i < path.length; i++) {
+    const node = path[i];
+    const nextNode = path[i + 1];
+    if (self.gridX === node.gridX && self.gridY === node.gridY && nextNode) {
+      setTimeout(() => {
+        self.gridX = nextNode.gridX;
+        self.gridY = nextNode.gridY;
+      }, 250);
+    }
+  }
 };
 
 export const followEnemy = (self, target, all) => {
@@ -306,7 +331,6 @@ export const findTarget = (self, opponentList) => {
 export const isNextToEnemy = (self, target) => {
   const diffX = Math.abs(target.gridX - self.gridX);
   const diffY = Math.abs(target.gridY - self.gridY);
-  const isTrue = (diffX === 1 && diffY === 0) || (diffX === 0 && diffY === 1);
   return (diffX === 1 && diffY === 0) || (diffX === 0 && diffY === 1);
 };
 
@@ -318,4 +342,5 @@ export default {
   findTarget,
   isNextToEnemy,
   aStar,
+  move,
 };

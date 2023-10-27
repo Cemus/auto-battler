@@ -9,7 +9,6 @@ import {
 //Variables
 let target = null;
 let coolDown = 100;
-
 class Enemy {
   constructor(name, job, gridX, gridY, stats, hasMoved, hasAttacked) {
     this.name = name;
@@ -55,7 +54,7 @@ function updateEnemyBehavior(self, playersList, allies, nextPlayer) {
     coolDown -= self.stats.spd;
   }
   let all = [...playersList, ...allies];
-  /*   console.log(self, currentState); */
+  console.log(self, currentState);
   switch (currentState) {
     case STATE_IDLE:
       if (self.hasAttacked === false) {
@@ -76,10 +75,11 @@ function updateEnemyBehavior(self, playersList, allies, nextPlayer) {
     case STATE_ENGAGE:
       if (target) {
         if (!ai.canAttack(self)) {
+          const path = ai.aStar(self, target, all);
+
           if (!ai.isNextToEnemy(self, target)) {
-            if (self.hasMoved === false) {
-              self.hasMoved = true;
-              ai.aStar(self, target, all);
+            if (path) {
+              ai.move(self, path);
             }
           } else {
             currentState = STATE_ATTACK;

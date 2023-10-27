@@ -15,6 +15,11 @@ const enemiesStats2 = {
   def: 5,
   spd: 50,
 };
+const enemiesStats3 = {
+  atk: 5,
+  def: 5,
+  spd: 70,
+};
 
 let playerChar1 = new Player("Jean", "mage", 1, 2, 100);
 let playerChar2 = new Player("Jean", "mage", 2, 4, 100);
@@ -38,15 +43,15 @@ let enemyChar2 = new Enemy(
 );
 let enemyChar3 = new Enemy(
   "Méchant mage",
-  "mage",
-  4,
-  5,
-  enemiesStats2,
+  "archer",
+  2,
+  3,
+  enemiesStats3,
   false,
   false
 );
 
 playersList.push(playerChar1);
-enemiesList.push(enemyChar1, enemyChar3);
+enemiesList.push(enemyChar1, enemyChar2, enemyChar3);
 
 export { playersList, enemiesList };
