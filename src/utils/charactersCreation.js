@@ -1,5 +1,5 @@
 import { Player } from "../entities/player.js";
-import { Enemy } from "../entities/enemies";
+import { Enemy } from "../entities/enemies.js";
 
 const playersList = [];
 const enemiesList = [];
@@ -42,8 +42,8 @@ let enemyChar2 = new Enemy(
   false
 );
 let enemyChar3 = new Enemy(
-  "Méchant mage",
-  "archer",
+  "Méchant warrior",
+  "warrior",
   2,
   3,
   enemiesStats3,

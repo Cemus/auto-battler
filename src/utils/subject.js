@@ -1,4 +1,4 @@
-import { player } from 
+/* import { player } from 
 
 function subjectParser(subject) {
   switch (subject) {
@@ -11,4 +11,4 @@ function subjectParser(subject) {
   }
 }
 
-export { subjectParser };
+export { subjectParser }; */

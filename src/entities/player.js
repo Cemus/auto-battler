@@ -4,11 +4,10 @@ import {
   drawCircle,
   drawTriangle,
   drawCross,
-  squareSize,
 } from "../utils/draw.js";
-import { conditionParser } from "../utils/conditions.js";
-import { actionParser } from "../utils/actions.js";
-import { canvas } from "../utils/canvas.js";
+import * as canv from "../utils/canvas.js";
+/* import { conditionParser } from "../utils/conditions.js";
+import { actionParser } from "../utils/actions.js"; */
 
 class Player {
   constructor(name, job, gridX, gridY, coolDown) {
@@ -19,10 +18,10 @@ class Player {
     this.coolDown = coolDown;
   }
   sprite() {
-    const cellSize = 64;
-    const cellSpacing = 1;
-    const x = this.gridX * (cellSize + cellSpacing) + cellSize / 2;
-    const y = this.gridY * (cellSize + cellSpacing) + cellSize / 2;
+    const x =
+      this.gridX * (canv.cellSize * canv.cellSpacing) + canv.cellSize / 2;
+    const y =
+      this.gridY * (canv.cellSize * canv.cellSpacing) + canv.cellSize / 2;
     switch (this.job) {
       case "warrior":
         drawTriangle(x, y, "blue");
@@ -49,11 +48,11 @@ class Gambit {
     this.player = player;
   }
 
-  evaluate(player, enemies, target, subject) {
+  /*   evaluate(player, enemies, target, subject) {
     if (conditionParser(this.condition, subject)) {
       actionParser(this.action);
     }
-  }
+  } */
 }
 
 const gambitContainers = document.querySelectorAll(".gambit-container");
@@ -78,7 +77,6 @@ gambitContainers.forEach((container, index) => {
 console.log(gambits);
 
 function updatePlayerBehavior(self, enemies) {
-  ai.correctPosition(self);
   self.sprite();
   if (self.coolDown === 0) {
     for (const gambit of gambits) {

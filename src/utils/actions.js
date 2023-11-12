@@ -22,7 +22,7 @@ const heal = (player, target) => {
   console.log(`je heal ${target} ^^`);
 };
 
-const defend = (player) => {
+const defend = () => {
   console.log("je defends lol");
 };
 

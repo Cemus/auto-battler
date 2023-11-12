@@ -5,7 +5,7 @@ import {
   drawTriangle,
   drawCross,
 } from "../utils/draw.js";
-
+import * as canv from "../utils/canvas.js";
 //Variables
 let target = null;
 let coolDown = 100;
@@ -20,10 +20,10 @@ class Enemy {
     this.hasAttacked = hasAttacked;
   }
   sprite() {
-    const cellSize = 64;
-    const cellSpacing = 1;
-    const x = this.gridX * (cellSize + cellSpacing) + cellSize / 2;
-    const y = this.gridY * (cellSize + cellSpacing) + cellSize / 2;
+    const x =
+      this.gridX * (canv.cellSize * canv.cellSpacing) + canv.cellSize / 2;
+    const y =
+      this.gridY * (canv.cellSize * canv.cellSpacing) + canv.cellSize / 2;
     switch (this.job) {
       case "warrior":
         drawTriangle(x, y, "red");
@@ -49,7 +49,6 @@ const STATE_ENGAGE = "ENGAGE";
 let currentState = STATE_IDLE;
 
 function updateEnemyBehavior(self, playersList, allies, nextPlayer) {
-  ai.correctPosition(self);
   if (coolDown > 0) {
     coolDown -= self.stats.spd;
   }
@@ -64,12 +63,14 @@ function updateEnemyBehavior(self, playersList, allies, nextPlayer) {
       }
       break;
     case STATE_FIND:
-      const playerTargetted = ai.findTarget(self, playersList);
-      if (playerTargetted) {
-        target = playerTargetted;
-        currentState = STATE_IDLE;
-      } else {
-        currentState = STATE_FIND;
+      {
+        const playerTargetted = ai.findTarget(self, playersList);
+        if (playerTargetted) {
+          target = playerTargetted;
+          currentState = STATE_IDLE;
+        } else {
+          currentState = STATE_FIND;
+        }
       }
       break;
     case STATE_ENGAGE:

@@ -7,12 +7,12 @@ const numCols = 8;
 const numRows = 8;
 const cellSize = 64;
 const gridSize = numCols * numRows;
+const cellSpacing = 1;
 
 const createGrid = (ctx) => {
   const cellColor = "black";
-  const cellSpacing = 1;
-
   ctx.strokeStyle = "white";
+
   for (let i = 0; i <= numCols; i++) {
     ctx.beginPath();
     ctx.moveTo(i * cellSize, 0);
@@ -40,4 +40,13 @@ const createGrid = (ctx) => {
   }
 };
 
-export { canvas, ctx, createGrid, gridSize };
+export {
+  canvas,
+  ctx,
+  createGrid,
+  gridSize,
+  numCols,
+  numRows,
+  cellSize,
+  cellSpacing,
+};

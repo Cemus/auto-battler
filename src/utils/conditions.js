@@ -1,11 +1,11 @@
-function conditionParser(condition, subject) {
+/* function conditionParser(condition, subject) {
   switch (condition) {
     case "HP > 50%":
       return ifHPUnder50(subject);
 
     case "enemies nearby":
       return areEnemiesNearby(subject, enemies);
-      sub;
+
   }
 }
 
@@ -19,3 +19,4 @@ const areEnemiesNearby = (subject, enemies) => {
 };
 
 export { conditionParser, ifHPUnder50 };
+ */
